@@ -1,0 +1,24 @@
+[package]
+name = "packet_inspector"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "packet-inspector-pcap"
+path = "src/bin/pcap/main.rs"
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+log = "0.4.22"
+env_logger = "0.11.5"
+chrono = "0.4.39"
+colored = "2.1.0"
+clap = { version = "4.5.23", features = ["derive"] }
+strum = { version = "0.26", features = ["derive"] }
+xxhash-rust = { version = "0.8.12", features = ["xxh3"] }
+
+[profile.release]
+lto = true
+strip = true
