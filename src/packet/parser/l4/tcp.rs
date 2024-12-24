@@ -68,13 +68,14 @@ impl Tcp {
         sig.add_signature_two_way(&tcp.src.to_le_bytes(), &tcp.dst.to_le_bytes());
         pkt.add_layer(OsiLayer::L4(L4Protocols::Tcp(tcp)));
 
-        tcp_sessions.add_packet((pkt, sig));
+        tcp_sessions.add_packet((pkt, sig), false);
 
         Ok(())
     }
 
     pub fn parse_tcp_return_session(
         packet: packet::SoloPacket,
+        crafted: bool,
         tcp_sessions: &mut TCPSessions,
     ) -> Result<&Rc<RefCell<TCPSession>>, OsiLayerError> {
         let (mut pkt, mut sig) = packet;
@@ -114,7 +115,7 @@ impl Tcp {
         sig.add_signature_two_way(&tcp.src.to_le_bytes(), &tcp.dst.to_le_bytes());
         pkt.add_layer(OsiLayer::L4(L4Protocols::Tcp(tcp)));
 
-        Ok(tcp_sessions.add_packet((pkt, sig)))
+        Ok(tcp_sessions.add_packet((pkt, sig), crafted))
     }
 
     pub fn get_cwr_bit(&self) -> bool {

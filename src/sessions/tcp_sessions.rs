@@ -37,7 +37,7 @@ impl TCPSessions {
         }
     }
 
-    pub fn add_packet(&mut self, packet: packet::SoloPacket) -> &Rc<RefCell<TCPSession>> {
+    pub fn add_packet(&mut self, packet: packet::SoloPacket, crafted: bool) -> &Rc<RefCell<TCPSession>> {
         let (pkt, sig) = packet;
         let time = (pkt.get_time().timestamp()) as u64;
         while time >= self.next_time_wake_up {
@@ -50,13 +50,16 @@ impl TCPSessions {
         let index = self.compute_wake_up_session_in(DEFAULT_SESSION_TIME_SEC);
 
         if let Some(session) = self.hashmap.get(&sig) {
-            session.borrow_mut().session_add_packet(pkt);
+            session.borrow_mut().session_add_packet(pkt, crafted);
             session.borrow_mut().set_timer_index(index);
         } else {
-            let session = Rc::new(RefCell::new(TCPSession::new(
-                (pkt, sig.clone()), // only one clone will be made per session, performance cost is acceptable
+            let mut session = TCPSession::new(
                 self.session_unique_number,
-            )));
+                pkt.get_time(),
+                sig.clone(), // only one clone will be made per session, performance cost is acceptable
+            );
+            session.session_add_packet(pkt, crafted);
+            let session = Rc::new(RefCell::new(session));
             let session_clone = Rc::clone(&session);
             self.session_unique_number += 1;
             self.hashmap.insert(sig.clone(), session);

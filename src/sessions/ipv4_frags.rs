@@ -49,10 +49,10 @@ impl Ipv4Frags {
                     }
                     ipprot::TCP => {
                         if let Ok(session) =
-                            Tcp::parse_tcp_return_session((new_packet, sig), tcp_sessions)
+                            Tcp::parse_tcp_return_session((new_packet, sig), true, tcp_sessions)
                         {
                             for packet in fragments {
-                                session.borrow_mut().session_add_packet(packet);
+                                session.borrow_mut().session_add_packet_for_pcap(packet);
                             }
                         }
                     }
